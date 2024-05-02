@@ -1,15 +1,18 @@
 <script setup>
-    import { inject } from 'vue'; //recupera de provide
+    import { inject, ref } from 'vue'; //recupera de provide
     import { useRouter } from 'vue-router';
     import AuthAPI from '@/api/AuthAPI';
 
     const toast = inject('toast')
     const router = useRouter()
+    const loading = ref(false)
 
     const handleSubmit = async (formData) => {
+        loading.value = true
         try {
             const { data: { token } } = await AuthAPI.login(formData)
             localStorage.setItem('AUTH_TOKEN',token)
+            loading.value = false
             router.push({name: 'my-appointments'})
         } catch (err) {
             // console.error(err)
@@ -17,6 +20,7 @@
                 message: err.response.data.msg,
                 type: 'error'
             })
+            loading.value = false
         }
     }
 </script>
@@ -54,7 +58,13 @@
             }"
         />
 
-        <FormKit type="submit">Iniciar sesión</FormKit>
+        <FormKit 
+            type="submit"
+            :classes="{
+                outer: {
+                    'animate-pulse': loading
+                }
+            }">Iniciar sesión</FormKit>
 
     </FormKit>
 </template>
